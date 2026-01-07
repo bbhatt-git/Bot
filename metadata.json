@@ -1,0 +1,5 @@
+{
+  "name": "Universal Web Agent - Sentinel",
+  "description": "An elite security research dashboard simulating a Universal Web Agent. It features a live terminal, BFS crawl visualization, and AI-driven vulnerability analysis using Gemini.",
+  "requestFramePermissions": []
+}
