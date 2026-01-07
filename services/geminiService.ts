@@ -82,7 +82,9 @@ export const analyzeTargetForSimulation = async (targetUrl: string): Promise<{
         // Use .text property instead of .text()
         const text = response.text;
         if (text) {
-            return JSON.parse(text);
+             // Sanitize: Remove Markdown code blocks if present
+            const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(cleanText);
         }
         return { logs: [], vulnerabilities: [] };
 
