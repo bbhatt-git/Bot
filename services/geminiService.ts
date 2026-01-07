@@ -6,8 +6,10 @@ import { LogLevel, Vulnerability } from "../types";
 // by using Gemini to hallucinate the specific technical logs and findings based on the target.
 // In a real deployment, this service would be the "Intelligence" layer analyzing raw HTML.
 
-// Correctly initialized with a named parameter
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize safely. If API_KEY is missing, use a placeholder to prevent constructor crash,
+// but validation checks elsewhere will prevent actual calls.
+const apiKey = process.env.API_KEY || "dummy_key_for_init";
+const ai = new GoogleGenAI({ apiKey });
 
 const SYSTEM_INSTRUCTION = `
 You are the kernel of an elite automated security agent named "Sentinel". 
@@ -40,6 +42,8 @@ export const analyzeTargetForSimulation = async (targetUrl: string): Promise<{
     `;
 
     try {
+        if (!process.env.API_KEY) throw new Error("API Key missing");
+
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
@@ -108,6 +112,8 @@ export const analyzeTargetForSimulation = async (targetUrl: string): Promise<{
 
 export const analyzeCodeSnippet = async (code: string): Promise<string> => {
     try {
+        if (!process.env.API_KEY) return "API Key missing. Cannot perform SAST analysis.";
+        
         const response = await ai.models.generateContent({
             model: 'gemini-3-pro-preview',
             contents: `Analyze this code snippet for security vulnerabilities. Provide a concise, bulleted markdown report focusing on critical risks like Injection, Auth bypass, or XSS.\n\nCode:\n${code}`,
