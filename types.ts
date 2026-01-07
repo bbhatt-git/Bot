@@ -14,6 +14,14 @@ export interface LogEntry {
   module: 'CRAWLER' | 'DAST' | 'FORM_BOT' | 'CORE';
 }
 
+export interface CrawlNode {
+  id: string;
+  url: string;
+  status: 'pending' | 'visited' | 'vuln';
+  depth: number;
+  parent?: string;
+}
+
 export interface Vulnerability {
   id: string;
   type: string;

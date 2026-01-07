@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { LogLevel, Vulnerability } from "../types";
 
@@ -5,6 +6,7 @@ import { LogLevel, Vulnerability } from "../types";
 // by using Gemini to hallucinate the specific technical logs and findings based on the target.
 // In a real deployment, this service would be the "Intelligence" layer analyzing raw HTML.
 
+// Correctly initialized with a named parameter
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const SYSTEM_INSTRUCTION = `
@@ -71,13 +73,16 @@ export const analyzeTargetForSimulation = async (targetUrl: string): Promise<{
                                 }
                             }
                         }
-                    }
+                    },
+                    propertyOrdering: ["logs", "vulnerabilities"]
                 }
             }
         });
 
-        if (response.text) {
-            return JSON.parse(response.text);
+        // Use .text property instead of .text()
+        const text = response.text;
+        if (text) {
+            return JSON.parse(text);
         }
         return { logs: [], vulnerabilities: [] };
 
@@ -108,6 +113,7 @@ export const analyzeCodeSnippet = async (code: string): Promise<string> => {
                 systemInstruction: "You are a Static Application Security Testing (SAST) engine."
             }
         });
+        // Use .text property instead of .text()
         return response.text || "No analysis generated.";
     } catch (e) {
         console.error("Code Analysis Failed", e);
