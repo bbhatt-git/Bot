@@ -39,7 +39,7 @@ export const analyzeTargetForSimulation = async (targetUrl: string): Promise<{
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-latest',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
             config: {
                 systemInstruction: SYSTEM_INSTRUCTION,
@@ -83,11 +83,16 @@ export const analyzeTargetForSimulation = async (targetUrl: string): Promise<{
 
     } catch (e) {
         console.error("Gemini Simulation Failed", e);
-        // Fallback mock data in case of API failure
+        // Fallback mock data in case of API failure to keep the app feeling "alive"
         return {
             logs: [
                 { level: LogLevel.ERROR, message: "Gemini Uplink Failed. Reverting to local heuristics.", module: 'CORE' },
-                { level: LogLevel.WARN, message: "Connection unstable. Retrying handshake...", module: 'CRAWLER' }
+                { level: LogLevel.WARN, message: "Connection unstable. Retrying handshake...", module: 'CRAWLER' },
+                { level: LogLevel.INFO, message: "Falling back to offline simulation database...", module: 'CORE' },
+                { level: LogLevel.WARN, message: "Simulating scan for " + targetUrl, module: 'CORE' },
+                { level: LogLevel.INFO, message: "GET /login [200 OK] - 45ms", module: 'CRAWLER' },
+                { level: LogLevel.INFO, message: "Found input[name='username']", module: 'FORM_BOT' },
+                { level: LogLevel.INFO, message: "Testing payload: ' OR 1=1 --", module: 'DAST' }
             ],
             vulnerabilities: []
         };
@@ -97,7 +102,7 @@ export const analyzeTargetForSimulation = async (targetUrl: string): Promise<{
 export const analyzeCodeSnippet = async (code: string): Promise<string> => {
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-latest',
+            model: 'gemini-3-pro-preview',
             contents: `Analyze this code snippet for security vulnerabilities. Provide a concise, bulleted markdown report focusing on critical risks like Injection, Auth bypass, or XSS.\n\nCode:\n${code}`,
             config: {
                 systemInstruction: "You are a Static Application Security Testing (SAST) engine."
@@ -105,6 +110,7 @@ export const analyzeCodeSnippet = async (code: string): Promise<string> => {
         });
         return response.text || "No analysis generated.";
     } catch (e) {
-        return "Error analyzing code snippet.";
+        console.error("Code Analysis Failed", e);
+        return "Error analyzing code snippet. Ensure API Key is valid.";
     }
 }
